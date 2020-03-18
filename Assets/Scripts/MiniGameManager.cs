@@ -4,7 +4,7 @@ using UnityEngine;
 
 //script to start up and update all mini games
 public class MiniGameManager : MonoBehaviour
-{
+{        
     public static MiniGameManager instance = null;
 
     private IMiniGame _minigame;
