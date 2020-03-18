@@ -3,11 +3,89 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
+public enum GameState
+{
+    AWAKE,
+    INIT,
+    CORE,
+    END,
+    COMPLETE,
+}
+
 public class MiniGame : IMiniGame
 {
+    private GameState _currentState = GameState.AWAKE;
+    protected bool _restartGame;
+    protected bool _lockStateUpdate;
+
+    void IMiniGame.RunMiniGame()
+    {
+        OnRunMiniGame();
+    }
+
+    //main run switch
+    protected virtual void OnRunMiniGame()
+    {
+        //if the states aren't locked to not update
+        if (MiniGameManager.instance.GameStateLock == false)
+        {
+            //run the state switch for the mini game
+            switch (_currentState)
+            {
+                case GameState.AWAKE:
+                    OnAwake();
+                    break;
+                case GameState.INIT:
+                    RunInitialise();
+                    break;
+                case GameState.CORE:
+                    RunUpdate();
+                    break;
+                case GameState.END:
+                    RunExit();
+                    break;
+                case GameState.COMPLETE:
+                    CompleteState();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+    }
+
+
+
+    //Awake - unlike the other functions that can loop - this will only run once!
+
+    void IMiniGame.Awake()
+    {
+        OnAwake();
+    }
+
+    protected virtual void OnAwake()
+    {
+        _currentState = GameState.INIT;
+        CheckLockState();
+    }
+
+
+    //Initialisation//
+    private bool RunInitialise()
+    {
+        if (OnInitialise() && !MiniGameManager.instance.GameStateForceLoop)
+        {
+            _currentState = GameState.CORE;
+            CheckLockState();
+            return true;
+        }
+
+        return false;
+    }
+
     bool IMiniGame.Initialise()
     {
-        return OnInitialise();
+        return RunInitialise();
     }
 
     protected virtual bool OnInitialise()
@@ -15,9 +93,22 @@ public class MiniGame : IMiniGame
         return true;
     }
 
+    //Update function//
+    private bool RunUpdate()
+    {
+        if (Update() && !MiniGameManager.instance.GameStateForceLoop)
+        {
+            _currentState = GameState.END;
+            CheckLockState();
+            return true;
+        }
+
+        return false;
+    }
+
     bool IMiniGame.OnUpdate()
     {
-        return Update();
+        return RunUpdate();
     }
 
     protected virtual bool Update()
@@ -25,6 +116,56 @@ public class MiniGame : IMiniGame
         return true;
     }
 
+    //Exit function//
+    private bool RunExit()
+    {
+        if (OnExit() && !MiniGameManager.instance.GameStateForceLoop)
+        {
+            _currentState = GameState.COMPLETE;
+            CheckLockState();
+            return true;
+        }
+        return false;
+    }
+
+    bool IMiniGame.Exit()
+    {
+        return RunExit();
+    }
+
+    protected virtual bool OnExit()
+    {
+        //allow mini game selection again
+        Camera.main.GetComponentInParent<CameraMove>().SelectableState = true;
+        return true;
+    }
+
+    //Complete state
+    private void CompleteState()
+    {
+        if (_restartGame)
+        {
+            _currentState = GameState.INIT;
+        }
+        else
+        {
+            MiniGameManager.instance.GameName = "";
+            MiniGameManager.instance.StopMiniGame();
+        }
+    }
+
+    private void CheckLockState()
+    {
+        if (_lockStateUpdate)
+        {
+            MiniGameManager.instance.LockGameState();
+            _lockStateUpdate = false;
+        }
+    }
+
+
+
+    //Win function//
     bool IMiniGame.Won()
     {
         return Win();
@@ -32,22 +173,14 @@ public class MiniGame : IMiniGame
 
     protected virtual bool Win()
     {
-        return true;
-    }
+        OnExit();
 
-    public bool Exit()
-    {
-        return OnExit();
-    }
-
-    protected virtual bool OnExit()
-    {
         return true;
     }
 
 
-
-    public void FadeText(GameObject[] Texts, bool FadeIn)
+    //Additional shared functions
+    public void FadeText(GameObject[] Texts, bool FadeIn, float duration)
     {
         //show texts
         foreach (GameObject text in Texts)
@@ -69,10 +202,10 @@ public class MiniGame : IMiniGame
 
             alphaEnd.a = FadeIn ? 1 : 0;
 
-            LeanTween.value(text, a => tmpText.color = a, alphaStart, alphaEnd, 10f).setEase(LeanTweenType.easeOutElastic);
+            LeanTween.value(text, a => tmpText.color = a, alphaStart, alphaEnd, duration).setEase(LeanTweenType.easeOutElastic);
         }
     }
-    public void FadeText(GameObject Text, bool FadeIn)
+    public void FadeText(GameObject Text, bool FadeIn, float duration)
     {
         //show texts
         TextMeshPro tmpText = Text.GetComponent<TextMeshPro>();
@@ -92,6 +225,29 @@ public class MiniGame : IMiniGame
 
         alphaEnd.a = FadeIn ? 1 : 0;
 
-        LeanTween.value(Text, a => tmpText.color = a, alphaStart, alphaEnd, 10f).setEase(LeanTweenType.easeOutElastic);
+        LeanTween.value(Text, a => tmpText.color = a, alphaStart, alphaEnd, duration).setEase(LeanTweenType.easeOutElastic);
     }
+
+
+    public void FadeObject(GameObject obj, float fadeTime, bool fadeIn, float minAlpha = 0, float maxAlpha = 1)
+    {
+        //get the mateiral
+        Material mat = obj.GetComponent<MeshRenderer>().material;
+
+        Color alphaStart = mat.color;
+        Color alphaEnd = alphaStart;
+
+        if (fadeIn)
+        {
+            alphaEnd.a = maxAlpha;
+            LeanTween.value(obj, a => mat.color = a, alphaStart, alphaEnd, fadeTime).setEase(LeanTweenType.easeInQuad);
+        }
+        else
+        {
+            alphaEnd.a = minAlpha;
+            LeanTween.value(obj, a => mat.color = a, alphaStart, alphaEnd, fadeTime).setEase(LeanTweenType.easeOutQuad);
+        }
+    }
+
+
 }

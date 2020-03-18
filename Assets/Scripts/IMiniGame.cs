@@ -4,6 +4,8 @@ using UnityEngine;
 
 public interface IMiniGame
 {
+    void RunMiniGame();
+    void Awake();
     bool Initialise();
     bool OnUpdate();
     bool Won();

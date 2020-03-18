@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-//animation events to start mini games
+//animation events from the camera to start mini games
 public class EventsHandler : MonoBehaviour
 {
     public void StartTruckGame()

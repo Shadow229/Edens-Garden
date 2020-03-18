@@ -5,6 +5,7 @@ public class CameraMove : MonoBehaviour
     private Animator _anim;
     private AnimationClip _currentClip;
 
+    public bool SelectableState = true;
 
     private void Start()
     {
@@ -14,25 +15,29 @@ public class CameraMove : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (SelectableState)
         {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out hit, 100.0f))
+            if (Input.GetMouseButtonDown(0))
             {
-                Debug.Log("You selected the " + hit.transform.name); // ensure you picked right object
-
-                if (hit.transform.CompareTag("MiniGame"))
+                RaycastHit hit;
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                if (Physics.Raycast(ray, out hit, 100.0f))
                 {
-                    //get the camera animation from the collider
-                    AnimationClip camMove = hit.transform.GetComponent<FocusBox>().CameraFocusAnimation;
+                    Debug.Log("You selected the " + hit.transform.name); // ensure you picked right object
 
-                    MoveToGame(camMove);
+                    if (hit.transform.CompareTag("MiniGame"))
+                    {
+                        //get the camera animation from the collider
+                        AnimationClip camMove = hit.transform.GetComponent<FocusBox>().CameraFocusAnimation;
+
+                        MoveToGame(camMove);
+                        SelectableState = false;
+                    }
                 }
             }
         }
 
-
+        //currently a place holder for a GUI revert button
         if (Input.GetMouseButtonDown(1))
         {
             ResetCamera();
@@ -46,15 +51,16 @@ public class CameraMove : MonoBehaviour
 
         _currentClip = clip;
 
-        _anim.Play(clip.name);
+        _anim.Play(clip.name, -1, 0);
     }
 
 
-    private void ResetCamera()
+    public void ResetCamera()
     {
         _anim.SetFloat("Direction", -1f);
-        
-        _anim.Play(_currentClip.name);
+        Debug.Log("Playing Animation Backwards");
+
+        _anim.Play(_currentClip.name,-1,1);
     }
 
 

@@ -6,9 +6,20 @@ using UnityEngine;
 public class MiniGameManager : MonoBehaviour
 {        
     public static MiniGameManager instance = null;
+    public string GameName = "";
+
+    //stops gamestate from progressing while still ticking - all actions in current state go on hold
+    public bool GameStateLock { get; private set; }
+    
+    //stops gamestate from progressing while still ticking - all actions in state are updated every tick
+    public bool GameStateForceLoop { get; private set; }
 
     private IMiniGame _minigame;
     private bool _run = false;
+
+    public IMiniGame GetMiniGameReference() { return _minigame; }
+    public void LockGameState() { GameStateLock = true; }
+    public void UnlockGameState() { GameStateLock = false; }
 
     private void Awake()
     {
@@ -19,22 +30,23 @@ public class MiniGameManager : MonoBehaviour
     public void StartMiniGame(IMiniGame a_MG)
     {
         _minigame = a_MG;
-        _minigame.Initialise();
         _run = true;
     }
 
     public void StopMiniGame()
     {
         _run = false;
-        _minigame.Exit();
         _minigame = null;
+
+        //return camera
+        Camera.main.GetComponentInParent<CameraMove>().ResetCamera();
     }
 
     private void Update()
     {
         if (_run)
         {
-            _minigame.OnUpdate();
+            _minigame.RunMiniGame();
         }
 
     }
