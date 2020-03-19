@@ -24,4 +24,7 @@ public class TruckGameInit : MonoBehaviour
     [Header("Other Frames")]
     public GameObject[] Frames = new GameObject[10];
 
+    [Header("Debris")]
+    public GameObject[] Bins = new GameObject[10];
+    public GameObject[] RoadBlocks;
 }

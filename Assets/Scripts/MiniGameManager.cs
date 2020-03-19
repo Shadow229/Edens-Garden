@@ -30,7 +30,12 @@ public class MiniGameManager : MonoBehaviour
     public void StartMiniGame(IMiniGame a_MG)
     {
         _minigame = a_MG;
-        _run = true;
+
+        if (_minigame != null)
+        {
+           _run = true;
+        }
+
     }
 
     public void StopMiniGame()
@@ -39,7 +44,9 @@ public class MiniGameManager : MonoBehaviour
         _minigame = null;
 
         //return camera
-        Camera.main.GetComponentInParent<CameraMove>().ResetCamera();
+        CameraMove camMove = Camera.main.GetComponentInParent<CameraMove>();
+        camMove.ResetCamera();
+        camMove.SelectableState = true;
     }
 
     private void Update()

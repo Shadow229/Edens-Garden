@@ -10,12 +10,11 @@ public class TruckGame : MiniGame
 
     private string _gameName = "Truck Game";
     private int _attempts;
-    private bool hasWon;
     private int _completedGames;
     private int _answerPart;
     private bool _ansFadeIn;
     private bool _inPosition;
-    private bool _IdleStateWaiting;
+    private bool _gameComplete;
 
     private float _fadeTimer;
 
@@ -26,17 +25,19 @@ public class TruckGame : MiniGame
     //runs once at creation - will not be part of a replayed game
     protected override void OnAwake()
     {
+        //set game name
         MiniGameManager.instance.GameName = _gameName;
 
+        //get gameobject for truckgame
         _truckGame = GameObject.Find("TruckGame");
 
-        //initialiser
+        //initialiser of truck game
         _initialiser = _truckGame.GetComponent<TruckGameInit>();
 
-        //fade in helptexts
-        FadeText(_initialiser.HelpTexts, true, 10f);
+        //fade in title/helptexts
+        FadeText(_initialiser.HelpTexts, true, 0.8f);
 
-        //van starts in position
+        //van starts in position on first run
         _inPosition = true;
 
         base.OnAwake();
@@ -44,9 +45,6 @@ public class TruckGame : MiniGame
 
     protected override bool OnInitialise()
     {
-        //clear any old panels
-        ClearAllPanels();
-
 
         //populate numbers
         InitialiseNumbers();
@@ -81,12 +79,17 @@ public class TruckGame : MiniGame
 
     protected override bool OnExit()
     {
-        //drive away
-        _initialiser.Truck.GetComponent<Animator>().Play("DriveAway");
-        //no longer in position
-        _inPosition = false;
-        //lock the state for the animation to run
-        _lockStateUpdate = true;
+        if (_gameComplete)
+        {
+            //final tidy up of game assets
+            GameComplete();
+        }
+        else
+        {
+            //no longer in position
+            _inPosition = false;
+        }
+
 
         return base.OnExit();   
     }
@@ -98,6 +101,7 @@ public class TruckGame : MiniGame
         _RequiredAns1 = centre - 1;
         _RequiredAns2 = centre + 1;
         int swingAmt = 10;
+        float fadeInTime = 1f;
 
         //set answer number
         _initialiser.AnswerFrame.GetComponentInChildren<TextMeshPro>().text = centre.ToString();
@@ -156,8 +160,8 @@ public class TruckGame : MiniGame
         }
 
         //fade them all in
-        FadeText(_initialiser.AnswerFrame, true, 10f);
-        FadeText(_initialiser.Frames, true, 10f);
+        FadeText(_initialiser.AnswerFrame, true, fadeInTime);
+        FadeText(_initialiser.Frames, true, fadeInTime);
 
     }
 
@@ -183,7 +187,7 @@ public class TruckGame : MiniGame
             highlightbox.SetActive(true);
 
             //fade object
-            FadeObject(highlightbox, _initialiser.AnsBoxBlinkTime, _ansFadeIn,0,0.7f);
+            FadeObject(highlightbox, _initialiser.AnsBoxBlinkTime, _ansFadeIn, false, false, 0f, 0.7f);
 
             //flip the fade for next time
             _ansFadeIn = !_ansFadeIn;
@@ -231,42 +235,51 @@ public class TruckGame : MiniGame
             //get the frame
             GameObject ansFrame = _answerPart == 1 ? _initialiser.Answers[0] : _initialiser.Answers[1];
             //show answer on answer frame
-            ansFrame.GetComponentInChildren<TextMeshPro>().text = answer.ToString();
+            TextMeshPro TMP = ansFrame.GetComponentInChildren<TextMeshPro>();
+            TMP.text = answer.ToString();
+            //show answer text
+            Color TMPCol = TMP.color;
+            TMPCol.a = 0.45f;
+            TMP.color = TMPCol;
 
             //reset the highlight box
-            GameObject highlightbox = ansFrame.transform.Find("Highlight").gameObject;
-            //Material mat = highlightbox.GetComponent<MeshRenderer>().material;
-            //Color col = mat.color;
-            //col.a = 0f;
-            //mat.color = col;
-            highlightbox.SetActive(false);
+            ansFrame.transform.Find("Highlight").gameObject.SetActive(false);
 
             //Go to next answer part
             if (_answerPart == 1)
             {
                 _answerPart = 2;
-                //answer correct, but stay in update for second part
+                //answer correct, but stay in update loop for second part
                 return false;
             }
             //or complete the game
             else
             {
-                Animator anim = _initialiser.Truck.GetComponent<Animator>();
+                //clear all of the panels down
+                ClearAllPanels();
+                //clear a bin
+                GameObject.Destroy(_initialiser.Bins[_completedGames], 0.2f);
+
                 //reset the game if total runs havent been played
-                if (_completedGames >= _initialiser.RequiredCompletions)
+                if (++_completedGames >= _initialiser.RequiredCompletions)
                 {
-                    anim.SetBool("Completed", true);
+                    //minigame is completed
+                    _gameComplete = true;
+                    //stop the reset game loop
                     _restartGame = false;
-                    //end update loop
-                    return true;
                 }
                 else
                 {
                     //reset the game
                     _restartGame = true;
-                    //end update loop
-                    return true;
                 }
+
+                //drive away
+                _initialiser.Truck.GetComponent<Animator>().Play("DriveAway");
+                //lock the state for animation to finish
+                _lockStateUpdate = true;
+                //end update loop
+                return true;
             }
         }
         else
@@ -274,10 +287,12 @@ public class TruckGame : MiniGame
             if (++_attempts >= _initialiser.MaxAttempts)
             {
                 Debug.Log("Too many attempts - resetting game");
+                ClearAllPanels();
                 _attempts = 0;
-                //drive off
-                Animator anim = _initialiser.Truck.GetComponent<Animator>();
-                anim.Play("DriveAway");
+                //drive away for the last time
+                _initialiser.Truck.GetComponent<Animator>().Play("DriveAway");
+                //lock the state for animation to finish
+                _lockStateUpdate = true;
                 //reset the game
                 _restartGame = true;
                 return true;
@@ -291,22 +306,38 @@ public class TruckGame : MiniGame
 
     public void ClearAllPanels()
     {
+        float fadeOutTime = 5f;
         //fade everything out
-        FadeText(_initialiser.AnswerFrame, false, 10f);
-        FadeText(_initialiser.Frames, false, 10f);
+        FadeText(_initialiser.AnswerFrame, false, fadeOutTime, true);
+        FadeText(_initialiser.Frames, false, fadeOutTime, true);
+        FadeText(_initialiser.Answers, false, fadeOutTime, true);
 
-        //centre answer
-        _initialiser.AnswerFrame.GetComponentInChildren<TextMeshPro>().text = "";
-        //chosen answers
-        _initialiser.Answers[0].GetComponentInChildren<TextMeshPro>().text = "";
-        _initialiser.Answers[1].GetComponentInChildren<TextMeshPro>().text = "";
-        //ground panels
-        for (int i = 0; i < _initialiser.Frames.Length; i++)
-        {
-            _initialiser.Frames[i].GetComponentInChildren<TextMeshPro>().text = "";
-        }
-
+        //stop highlight panels
         _initialiser.Answers[1].transform.Find("Highlight").gameObject.SetActive(false);
         _initialiser.Answers[0].transform.Find("Highlight").gameObject.SetActive(false);
+    }
+
+
+    private void GameComplete()
+    {
+        float fadeOutTime = 5f;
+
+        //remove the road blocks
+        //cant fade certain items as they have materials built with different shaders
+        //FadeObjects(_initialiser.RoadBlocks, fadeOutTime, false, false, true);
+        foreach (GameObject block in _initialiser.RoadBlocks)
+        {
+            GameObject.Destroy(block);
+        }
+
+
+        //clear all panel frames and billboards
+        FadeObjects(_initialiser.Frames, fadeOutTime, false, true, true);
+
+        //destroy the hit box for game selection
+        GameObject.Destroy(_truckGame.transform.Find("TruckGameFocus").gameObject);
+
+        //remove the help writing
+        FadeText(_initialiser.HelpTexts, false, fadeOutTime, true);
     }
 }

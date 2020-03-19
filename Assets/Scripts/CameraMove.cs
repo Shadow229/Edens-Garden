@@ -40,7 +40,7 @@ public class CameraMove : MonoBehaviour
         //currently a place holder for a GUI revert button
         if (Input.GetMouseButtonDown(1))
         {
-            ResetCamera();
+            MiniGameManager.instance.StopMiniGame();
         }
     }
 
@@ -57,10 +57,12 @@ public class CameraMove : MonoBehaviour
 
     public void ResetCamera()
     {
-        _anim.SetFloat("Direction", -1f);
-        Debug.Log("Playing Animation Backwards");
+        //_anim.SetFloat("Direction", -1f);
+        //Debug.Log("Playing Animation Backwards");
 
-        _anim.Play(_currentClip.name,-1,1);
+        //_anim.Play(_currentClip.name,-1,1);
+
+        _anim.SetTrigger("ResetCamera");
     }
 
 

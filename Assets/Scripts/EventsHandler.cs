@@ -10,4 +10,5 @@ public class EventsHandler : MonoBehaviour
     {
         MiniGameManager.instance.StartMiniGame(new TruckGame());
     }
+
 }

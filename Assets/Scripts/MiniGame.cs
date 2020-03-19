@@ -51,7 +51,6 @@ public class MiniGame : IMiniGame
                     break;
             }
         }
-
     }
 
 
@@ -180,32 +179,15 @@ public class MiniGame : IMiniGame
 
 
     //Additional shared functions
-    public void FadeText(GameObject[] Texts, bool FadeIn, float duration)
+    public void FadeText(GameObject[] Texts, bool FadeIn, float duration, bool clearText = false, float minAlpha = 0, float maxAlpha = 1)
     {
         //show texts
         foreach (GameObject text in Texts)
         {
-            TextMeshPro tmpText = text.GetComponent<TextMeshPro>();
-
-            if (tmpText == null)
-            {
-                tmpText = text.GetComponentInChildren<TextMeshPro>();
-            }
-
-            if (tmpText == null)
-            {
-                return;
-            }
-
-            Color alphaStart = tmpText.color;
-            Color alphaEnd = alphaStart;
-
-            alphaEnd.a = FadeIn ? 1 : 0;
-
-            LeanTween.value(text, a => tmpText.color = a, alphaStart, alphaEnd, duration).setEase(LeanTweenType.easeOutElastic);
+            FadeText(text, FadeIn, duration, clearText);
         }
     }
-    public void FadeText(GameObject Text, bool FadeIn, float duration)
+    public void FadeText(GameObject Text, bool FadeIn, float duration, bool clearText = false, float minAlpha = 0, float maxAlpha = 1)
     {
         //show texts
         TextMeshPro tmpText = Text.GetComponent<TextMeshPro>();
@@ -223,31 +205,93 @@ public class MiniGame : IMiniGame
         Color alphaStart = tmpText.color;
         Color alphaEnd = alphaStart;
 
-        alphaEnd.a = FadeIn ? 1 : 0;
-
-        LeanTween.value(Text, a => tmpText.color = a, alphaStart, alphaEnd, duration).setEase(LeanTweenType.easeOutElastic);
-    }
-
-
-    public void FadeObject(GameObject obj, float fadeTime, bool fadeIn, float minAlpha = 0, float maxAlpha = 1)
-    {
-        //get the mateiral
-        Material mat = obj.GetComponent<MeshRenderer>().material;
-
-        Color alphaStart = mat.color;
-        Color alphaEnd = alphaStart;
-
-        if (fadeIn)
+        if (FadeIn)
         {
             alphaEnd.a = maxAlpha;
-            LeanTween.value(obj, a => mat.color = a, alphaStart, alphaEnd, fadeTime).setEase(LeanTweenType.easeInQuad);
+            LeanTween.value(Text, a => tmpText.color = a, alphaStart, alphaEnd, duration).setEase(LeanTweenType.easeInCubic).setOnComplete(() => tmpText.color = alphaEnd);
         }
         else
         {
             alphaEnd.a = minAlpha;
-            LeanTween.value(obj, a => mat.color = a, alphaStart, alphaEnd, fadeTime).setEase(LeanTweenType.easeOutQuad);
+
+            if (clearText)
+            {
+                LeanTween.value(Text, a => tmpText.color = a, alphaStart, alphaEnd, duration).setEase(LeanTweenType.easeOutCubic).setOnComplete(() => ClearAlphaText(tmpText, alphaEnd));
+            }
+            else
+            {
+                LeanTween.value(Text, a => tmpText.color = a, alphaStart, alphaEnd, duration).setEase(LeanTweenType.easeOutCubic).setOnComplete(() => tmpText.color = alphaEnd);
+            }
         }
+    }
+    
+    private void ClearAlphaText(TextMeshPro TMP, Color alphaEnd)
+    {
+        TMP.color = alphaEnd; 
+        TMP.text = "";
     }
 
 
+    public void FadeObjects(GameObject[] objs, float fadeTime, bool fadeIn, bool FadeChildren = false, bool DestroyOnFadeOut = false, float minAlpha = 0, float maxAlpha = 1)
+    {
+        //show texts
+        foreach (GameObject obj in objs)
+        {
+            FadeObject(obj, fadeTime, fadeIn, FadeChildren, DestroyOnFadeOut, minAlpha, maxAlpha);
+        }
+    }
+
+    public void FadeObject(GameObject obj, float fadeTime, bool fadeIn, bool FadeChildren = false, bool DestroyOnFadeOut = false, float minAlpha = 0, float maxAlpha = 1)
+    {
+        List<Material> materials = new List<Material>();
+
+        if (FadeChildren)
+        {
+            MeshRenderer[] meshes = obj.GetComponentsInChildren<MeshRenderer>();
+            foreach (MeshRenderer mesh in meshes)
+            {
+                materials.Add(mesh.material);
+            }
+        }
+        else
+        {
+            //get the mateiral
+            materials.Add(obj.GetComponent<MeshRenderer>().material);
+        }
+
+
+        if (materials.Count > 0)
+        {
+            foreach (Material mat in materials)
+            {
+                //skip if we're in an object without color
+                if (mat.HasProperty("_Color") == false)
+                {
+                    continue;
+                };
+
+                Color alphaStart = mat.color;
+                Color alphaEnd = alphaStart;
+
+                if (fadeIn)
+                {
+                    alphaEnd.a = maxAlpha;
+                    LeanTween.value(obj, a => mat.color = a, alphaStart, alphaEnd, fadeTime).setEase(LeanTweenType.easeInQuad).setOnComplete(() => mat.color = alphaEnd);
+                }
+                else
+                {
+                    alphaEnd.a = minAlpha;
+
+                    if (DestroyOnFadeOut)
+                    {
+                        LeanTween.value(obj, a => mat.color = a, alphaStart, alphaEnd, fadeTime).setEase(LeanTweenType.easeOutQuad).setOnComplete(() => GameObject.Destroy(obj));
+                    }
+                    else
+                    {
+                        LeanTween.value(obj, a => mat.color = a, alphaStart, alphaEnd, fadeTime).setEase(LeanTweenType.easeOutQuad).setOnComplete(() => mat.color = alphaEnd);
+                    }
+                }
+            } 
+        }      
+    }
 }
