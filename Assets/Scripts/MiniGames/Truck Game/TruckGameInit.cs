@@ -27,4 +27,7 @@ public class TruckGameInit : MonoBehaviour
     [Header("Debris")]
     public GameObject[] Bins = new GameObject[10];
     public GameObject[] RoadBlocks;
+
+    [Header("Particles")]
+    public GameObject BinDisappear;
 }

@@ -257,6 +257,8 @@ public class TruckGame : MiniGame
             {
                 //clear all of the panels down
                 ClearAllPanels();
+                //play particle
+                Object.Instantiate(_initialiser.BinDisappear, _initialiser.Bins[_completedGames].transform.position, Quaternion.identity);
                 //clear a bin
                 GameObject.Destroy(_initialiser.Bins[_completedGames], 0.2f);
 
