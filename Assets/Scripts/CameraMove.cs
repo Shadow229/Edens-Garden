@@ -3,7 +3,6 @@
 public class CameraMove : MonoBehaviour
 {
     private Animator _anim;
-    private AnimationClip _currentClip;
 
     public bool SelectableState = true;
 
@@ -23,7 +22,7 @@ public class CameraMove : MonoBehaviour
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                 if (Physics.Raycast(ray, out hit, 100.0f))
                 {
-                    Debug.Log("You selected the " + hit.transform.name); // ensure you picked right object
+                    Debug.Log("You selected the " + hit.transform.name); // check object selection
 
                     if (hit.transform.CompareTag("MiniGame"))
                     {
@@ -40,28 +39,29 @@ public class CameraMove : MonoBehaviour
         //currently a place holder for a GUI revert button
         if (Input.GetMouseButtonDown(1))
         {
-            MiniGameManager.instance.StopMiniGame();
+            //if there is a game set - end it
+            if (MiniGameManager.instance.GetMiniGameReference() != null)
+            {
+                MiniGameManager.instance.StopMiniGame();
+            }
+            //otherwise return the camera and reset
+            else
+            {
+                SelectableState = true;
+                ResetCamera();
+            }
         }
     }
 
 
     private void MoveToGame(AnimationClip clip)
-    {
-        _anim.SetFloat("Direction", 1f);
-
-        _currentClip = clip;
-
+    { 
         _anim.Play(clip.name, -1, 0);
     }
 
 
     public void ResetCamera()
     {
-        //_anim.SetFloat("Direction", -1f);
-        //Debug.Log("Playing Animation Backwards");
-
-        //_anim.Play(_currentClip.name,-1,1);
-
         _anim.SetTrigger("ResetCamera");
     }
 

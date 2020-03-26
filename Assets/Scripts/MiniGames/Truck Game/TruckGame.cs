@@ -9,6 +9,7 @@ public class TruckGame : MiniGame
     private TruckGameInit _initialiser;
 
     private string _gameName = "Truck Game";
+    private string _compGameSaveLoc = "CompletedTruckGames";
     private int _attempts;
     private int _completedGames;
     private int _answerPart;
@@ -28,6 +29,9 @@ public class TruckGame : MiniGame
         //set game name
         MiniGameManager.instance.GameName = _gameName;
 
+        //get current completed games for this minigame
+        _completedGames = PlayerPrefs.GetInt(_compGameSaveLoc, 0);
+
         //get gameobject for truckgame
         _truckGame = GameObject.Find("TruckGame");
 
@@ -39,6 +43,9 @@ public class TruckGame : MiniGame
 
         //van starts in position on first run
         _inPosition = true;
+
+        //set exit flag
+        _exitOut = false;
 
         base.OnAwake();
     }
@@ -69,6 +76,9 @@ public class TruckGame : MiniGame
 
     protected override bool Update()
     {
+        //early out on exit
+        if (CheckExitTrigger()) { return true; }
+
         //flash the answer box
         FlashAnswerBox();
 
@@ -84,12 +94,19 @@ public class TruckGame : MiniGame
             //final tidy up of game assets
             GameComplete();
         }
+        else if (_exitOut)
+        {
+            //remove game texts and return
+            ExitOut();
+        }
         else
         {
             //no longer in position
             _inPosition = false;
         }
 
+        //set persistant score
+        PlayerPrefs.SetInt(_compGameSaveLoc, _completedGames);
 
         return base.OnExit();   
     }
@@ -306,9 +323,8 @@ public class TruckGame : MiniGame
         }   
     }
 
-    public void ClearAllPanels()
+    public void ClearAllPanels(float fadeOutTime = 5f)
     {
-        float fadeOutTime = 5f;
         //fade everything out
         FadeText(_initialiser.AnswerFrame, false, fadeOutTime, true);
         FadeText(_initialiser.Frames, false, fadeOutTime, true);
@@ -341,5 +357,17 @@ public class TruckGame : MiniGame
 
         //remove the help writing
         FadeText(_initialiser.HelpTexts, false, fadeOutTime, true);
+    }
+
+    private void ExitOut()
+    {
+        float fadeOutTime = 2f;
+
+        _restartGame = false;
+
+        ClearAllPanels(fadeOutTime);
+
+        //remove the help writing
+        FadeText(_initialiser.HelpTexts, false, fadeOutTime);
     }
 }

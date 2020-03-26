@@ -14,6 +14,9 @@ public class MiniGameManager : MonoBehaviour
     //stops gamestate from progressing while still ticking - all actions in state are updated every tick
     public bool GameStateForceLoop { get; private set; }
 
+    //trigger to stop a mini game - runs exit script on mini game
+    public bool ExitMiniGame { get; private set; }
+
     private IMiniGame _minigame;
     private bool _run = false;
 
@@ -23,6 +26,10 @@ public class MiniGameManager : MonoBehaviour
 
     private void Awake()
     {
+        //remove any player prefs - game starts from scratch every time
+        PlayerPrefs.DeleteAll();
+
+        //create instance of manager
         if (instance == null) { instance = this; }
         else if (instance != this) { Destroy(gameObject); }
     }
@@ -40,6 +47,12 @@ public class MiniGameManager : MonoBehaviour
 
     public void StopMiniGame()
     {
+        ExitMiniGame = true;   
+    }
+
+    public void ResetGameSelection()
+    {
+        ExitMiniGame = false;
         _run = false;
         _minigame = null;
 

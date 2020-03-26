@@ -17,6 +17,7 @@ public class MiniGame : IMiniGame
     private GameState _currentState = GameState.AWAKE;
     protected bool _restartGame;
     protected bool _lockStateUpdate;
+    protected bool _exitOut;
 
     void IMiniGame.RunMiniGame()
     {
@@ -149,7 +150,7 @@ public class MiniGame : IMiniGame
         else
         {
             MiniGameManager.instance.GameName = "";
-            MiniGameManager.instance.StopMiniGame();
+            MiniGameManager.instance.ResetGameSelection();
         }
     }
 
@@ -179,6 +180,18 @@ public class MiniGame : IMiniGame
 
 
     //Additional shared functions
+    protected bool CheckExitTrigger()
+    {
+            //early out on exit
+        if (MiniGameManager.instance.ExitMiniGame)
+        {
+            _exitOut = true;
+            return true;
+        }
+        return false;
+    }
+
+
     public void FadeText(GameObject[] Texts, bool FadeIn, float duration, bool clearText = false, float minAlpha = 0, float maxAlpha = 1)
     {
         //show texts
