@@ -52,6 +52,6 @@ public class FairyDustRandomPosition : MonoBehaviour {
     {
         yield return new WaitForSeconds(lifetime);
 
-        Destroy(this);
+        Destroy(this.gameObject);
     }
 }

@@ -1210,6 +1210,12 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 108709183}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &109124616 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1406288349017890, guid: 8ebf2155e10a4f14ab835414d879b666,
+    type: 3}
+  m_PrefabInstance: {fileID: 756976588}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &121638487
 GameObject:
   m_ObjectHideFlags: 0
@@ -2930,6 +2936,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 67cc81d5424ea4fccbc7267473502366, type: 3}
+--- !u!1 &299270192 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1300399225187642, guid: 7ed407e0aeced17448a2a8beade4d639,
+    type: 3}
+  m_PrefabInstance: {fileID: 1416325501}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &316603178
 GameObject:
   m_ObjectHideFlags: 0
@@ -9233,7 +9245,9 @@ MonoBehaviour:
   - {fileID: 611764625}
   - {fileID: 420461365}
   - {fileID: 1139216017}
-  RoadBlocks: []
+  RoadBlocks:
+  - {fileID: 109124616}
+  - {fileID: 299270192}
   BinDisappear: {fileID: 162536, guid: e8eccc730fd61eb438de7f0466e0ab3f, type: 3}
 --- !u!1 &1046089669
 GameObject:
