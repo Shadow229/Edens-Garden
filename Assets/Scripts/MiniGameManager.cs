@@ -32,6 +32,8 @@ public class MiniGameManager : MonoBehaviour
         //create instance of manager
         if (instance == null) { instance = this; }
         else if (instance != this) { Destroy(gameObject); }
+
+        DontDestroyOnLoad(this.gameObject);
     }
 
     public void StartMiniGame(IMiniGame a_MG)

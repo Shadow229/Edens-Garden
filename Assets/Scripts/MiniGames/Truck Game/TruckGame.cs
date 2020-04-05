@@ -29,6 +29,9 @@ public class TruckGame : MiniGame
         //set game name
         MiniGameManager.instance.GameName = _gameName;
 
+        //turn down the ambient music
+        MiniGameManager.instance.GetComponent<AudioSource>().volume = 0.1f;
+
         //get current completed games for this minigame
         _completedGames = PlayerPrefs.GetInt(_compGameSaveLoc, 0);
 
@@ -66,6 +69,8 @@ public class TruckGame : MiniGame
         if (_inPosition == false)
         {
             _inPosition = true;
+            //cue audio
+            _truckGame.GetComponent<AudioSource>().PlayOneShot(_initialiser.TruckArrive);
             //drive in
             _initialiser.Truck.GetComponent<Animator>().Play("DriveIn");
             //lock the state for the animation to run
@@ -107,6 +112,7 @@ public class TruckGame : MiniGame
 
         //set persistant score
         PlayerPrefs.SetInt(_compGameSaveLoc, _completedGames);
+
 
         return base.OnExit();   
     }
@@ -272,16 +278,25 @@ public class TruckGame : MiniGame
             //or complete the game
             else
             {
+                //cue audio
+                _truckGame.GetComponent<AudioSource>().PlayOneShot(_initialiser.TruckDisappear);
                 //clear all of the panels down
                 ClearAllPanels();
                 //play particle
                 Object.Instantiate(_initialiser.BinDisappear, _initialiser.Bins[_completedGames].transform.position, Quaternion.identity);
+                //and a noise
+                _truckGame.GetComponent<AudioSource>().PlayOneShot(_initialiser.Chime);
                 //clear a bin
                 GameObject.Destroy(_initialiser.Bins[_completedGames], 0.2f);
 
                 //reset the game if total runs havent been played
                 if (++_completedGames >= _initialiser.RequiredCompletions)
                 {
+                    //cue sound
+                    AudioSource aud = _truckGame.GetComponent<AudioSource>();
+                    aud.clip = _initialiser.GameComplete;
+                    aud.PlayDelayed(4f);
+
                     //minigame is completed
                     _gameComplete = true;
                     //stop the reset game loop
@@ -305,6 +320,9 @@ public class TruckGame : MiniGame
         {
             if (++_attempts >= _initialiser.MaxAttempts)
             {
+                //cue audio
+                _truckGame.GetComponent<AudioSource>().PlayOneShot(_initialiser.TruckDisappear);
+
                 Debug.Log("Too many attempts - resetting game");
                 ClearAllPanels();
                 _attempts = 0;
@@ -317,7 +335,7 @@ public class TruckGame : MiniGame
                 return true;
             }
             //got it wrong
-            Debug.Log("Stupid Motherfucker...");
+            Debug.Log("Wrong Answer...");
             //stay in the game
             return false;
         }   
@@ -357,6 +375,9 @@ public class TruckGame : MiniGame
 
         //remove the help writing
         FadeText(_initialiser.HelpTexts, false, fadeOutTime, true);
+
+        //turn up the ambient music
+        MiniGameManager.instance.GetComponent<AudioSource>().volume = 0.2f;
     }
 
     private void ExitOut()
@@ -369,5 +390,8 @@ public class TruckGame : MiniGame
 
         //remove the help writing
         FadeText(_initialiser.HelpTexts, false, fadeOutTime);
+
+        //turn up the ambient music
+        MiniGameManager.instance.GetComponent<AudioSource>().volume = 0.2f;
     }
 }

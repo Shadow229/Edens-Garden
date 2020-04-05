@@ -30,4 +30,11 @@ public class TruckGameInit : MonoBehaviour
 
     [Header("Particles")]
     public GameObject BinDisappear;
+
+    [Header("Audio")]
+    public AudioClip TruckArrive;
+    public AudioClip TruckDisappear;
+    public AudioClip Chime;
+    public AudioClip GameComplete;
+
 }
