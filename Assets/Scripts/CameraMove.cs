@@ -3,6 +3,7 @@
 public class CameraMove : MonoBehaviour
 {
     private Animator _anim;
+    public AudioClip GameSelection;
 
     public bool SelectableState = true;
 
@@ -28,6 +29,9 @@ public class CameraMove : MonoBehaviour
                     {
                         //get the camera animation from the collider
                         AnimationClip camMove = hit.transform.GetComponent<FocusBox>().CameraFocusAnimation;
+
+                        //cue audio
+                        GetComponent<AudioSource>().PlayOneShot(GameSelection);
 
                         MoveToGame(camMove);
                         SelectableState = false;

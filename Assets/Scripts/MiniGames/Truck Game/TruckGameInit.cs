@@ -36,5 +36,7 @@ public class TruckGameInit : MonoBehaviour
     public AudioClip TruckDisappear;
     public AudioClip Chime;
     public AudioClip GameComplete;
+    public AudioClip CorrectSelection;
+    public AudioClip WrongSelection;
 
 }

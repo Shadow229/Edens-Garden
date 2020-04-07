@@ -21,4 +21,10 @@ public class MainMenu : MonoBehaviour
 
         SceneManager.LoadScene("Garden Scene");
     }
+
+
+    public void ExitGame()
+    {
+        Application.Quit();
+    }
 }

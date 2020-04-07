@@ -42,7 +42,7 @@ public class MiniGameManager : MonoBehaviour
 
         if (_minigame != null)
         {
-           _run = true;
+            _run = true;
         }
 
     }

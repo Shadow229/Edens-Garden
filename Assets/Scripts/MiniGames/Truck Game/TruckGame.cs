@@ -61,6 +61,8 @@ public class TruckGame : MiniGame
 
         //start with the first answer
         _answerPart = 1;
+        //start with all attempts
+        _attempts = 0;
 
         //start with a fade in on the answer boxes
         _ansFadeIn = true;
@@ -254,7 +256,9 @@ public class TruckGame : MiniGame
         if (ans == answer)
         {
             Debug.Log("You are right!");
-            
+            //cue audio
+            _truckGame.GetComponent<AudioSource>().PlayOneShot(_initialiser.CorrectSelection);
+
             //get the frame
             GameObject ansFrame = _answerPart == 1 ? _initialiser.Answers[0] : _initialiser.Answers[1];
             //show answer on answer frame
@@ -318,6 +322,9 @@ public class TruckGame : MiniGame
         }
         else
         {
+            //cue audio
+            _truckGame.GetComponent<AudioSource>().PlayOneShot(_initialiser.WrongSelection);
+
             if (++_attempts >= _initialiser.MaxAttempts)
             {
                 //cue audio
