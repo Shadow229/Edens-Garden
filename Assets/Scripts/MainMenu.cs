@@ -6,6 +6,8 @@ using UnityEngine.SceneManagement;
 public class MainMenu : MonoBehaviour
 {
     public GameObject FadeScreen;
+    public AudioClip ButtonHighlight;
+    public AudioClip ClickSelect;
 
     public void PlayGame()
     {
@@ -26,5 +28,15 @@ public class MainMenu : MonoBehaviour
     public void ExitGame()
     {
         Application.Quit();
+    }
+
+
+    public void ButtonHighlighted()
+    {
+        MiniGameManager.instance.GetComponent<AudioSource>().PlayOneShot(ButtonHighlight);
+    }
+    public void ButtonClickSelect()
+    {
+        MiniGameManager.instance.GetComponent<AudioSource>().PlayOneShot(ClickSelect);
     }
 }
