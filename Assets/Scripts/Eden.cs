@@ -7,6 +7,8 @@ public class Eden : MonoBehaviour
     private Animator anim;
     private AudioSource aud;
 
+    public bool isNarrating { get; private set; }
+
     public AudioClip Greeting;
 
     // Start is called before the first frame update
@@ -27,12 +29,25 @@ public class Eden : MonoBehaviour
 
     IEnumerator PlayGreeting()
     {
+        //narration lock on
+        isNarrating = true;
+
         yield return new WaitForSeconds(2);
 
         //wave
         anim.Play("Greeting");
         //audio
+        float delay = 0.5f;
         aud.clip = Greeting;
-        aud.PlayDelayed(0.5f);
+        aud.PlayDelayed(delay);
+
+        //narration lock off
+        StartCoroutine(WaitAudio(aud.clip.length + delay));
+    }
+
+    private IEnumerator WaitAudio(float clipLength)
+    {
+        yield return new WaitForSeconds(clipLength);
+        isNarrating = false;
     }
 }

@@ -4,6 +4,8 @@ public class CameraMove : MonoBehaviour
 {
     private Animator _anim;
     public AudioClip GameSelection;
+    public Eden eden;
+
 
     public bool SelectableState = true;
 
@@ -15,6 +17,12 @@ public class CameraMove : MonoBehaviour
 
     private void Update()
     {
+        //disable is Eden is narrating
+        if (eden.isNarrating)
+        {
+            return;
+        }
+
         if (SelectableState)
         {
             if (Input.GetMouseButtonDown(0))
@@ -39,20 +47,22 @@ public class CameraMove : MonoBehaviour
                 }
             }
         }
-
-        //currently a place holder for a GUI revert button
-        if (Input.GetMouseButtonDown(1))
+        else
         {
-            //if there is a game set - end it
-            if (MiniGameManager.instance.GetMiniGameReference() != null)
+            //currently a place holder for a GUI revert button
+            if (Input.GetMouseButtonDown(1))
             {
-                MiniGameManager.instance.StopMiniGame();
-            }
-            //otherwise return the camera and reset
-            else
-            {
-                SelectableState = true;
-                ResetCamera();
+                //if there is a game set - end it
+                if (MiniGameManager.instance.GetMiniGameReference() != null)
+                {
+                    MiniGameManager.instance.StopMiniGame();
+                }
+                //otherwise return the camera and reset
+                else
+                {
+                    SelectableState = true;
+                    ResetCamera();
+                }
             }
         }
     }

@@ -1168,6 +1168,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GameName: 
+  eden: {fileID: 1046345435266607130, guid: 1595a5ce06f108c43af4793469205ab8, type: 3}
 --- !u!1 &675358877
 GameObject:
   m_ObjectHideFlags: 0
